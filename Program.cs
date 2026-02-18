@@ -5,6 +5,7 @@ using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Security;
 using IdentityService.Controllers;
 using Microsoft.EntityFrameworkCore;
+using static AuthService.Application.Service.AuthServiceImpl;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,7 @@ builder.Services.AddScoped<IAuthService, AuthServiceImpl>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 
 

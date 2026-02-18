@@ -6,4 +6,9 @@ namespace AuthService.Application.Interfaces
     {
         Task<LoginResponseDto> LoginAsync(LoginRequestDto request);
     }
+
+    public interface IUserService
+    {
+        Task<Guid> CreateUserAsync(UserRequestDto request);
+    }
 }

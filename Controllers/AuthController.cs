@@ -18,10 +18,13 @@ namespace IdentityService.Controllers
 
         private readonly IAuthService _authService;
 
-        public AuthController(ILogger<AuthController> logger, IAuthService authService)
+        private readonly IUserService _userService;
+
+        public AuthController(ILogger<AuthController> logger, IAuthService authService, IUserService userService)
         {
             _logger = logger;
             _authService = authService;
+            _userService = userService;
         }
 
 
@@ -29,6 +32,13 @@ namespace IdentityService.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
             var result = await _authService.LoginAsync(request);
+            return Ok(result);
+        }
+
+        [HttpPost("users")]
+        public async Task<IActionResult> CreateUser([FromBody] UserRequestDto request)
+        {
+            var result = await _userService.CreateUserAsync(request);
             return Ok(result);
         }
 

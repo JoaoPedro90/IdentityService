@@ -4,6 +4,8 @@ using AuthService.Domain.Entities;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.Security;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace AuthService.Application.Service
 {
@@ -46,6 +48,34 @@ namespace AuthService.Application.Service
                 ExpiresAt = DateTime.UtcNow.AddHours(1)
             };
         }
+
+        public class UserService : IUserService
+        {
+            private readonly IUserRepository _userRepository;
+
+            public UserService(IUserRepository userRepository)
+            {
+                _userRepository = userRepository;
+            }
+
+            public async Task<Guid> CreateUserAsync(UserRequestDto request)
+            {
+                var existingUser = await _userRepository.GetByEmailAsync(request.Email);
+
+                if (existingUser != null)
+                    throw new Exception("Usuário já existe");
+
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+                var user = new User(request.Email, passwordHash);
+
+                await _userRepository.AddAsync(user);
+
+                return user.Id;
+            }
+        }
+
+
     }
 
 }
