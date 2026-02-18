@@ -23,6 +23,7 @@ namespace AuthService.Infrastructure.Repositories
 
         public async Task AddAsync(User user)
         {
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }

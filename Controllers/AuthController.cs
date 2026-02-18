@@ -18,22 +18,12 @@ namespace IdentityService.Controllers
 
         private readonly IAuthService _authService;
 
-        public AuthController(ILogger<AuthController> logger)
+        public AuthController(ILogger<AuthController> logger, IAuthService authService)
         {
             _logger = logger;
+            _authService = authService;
         }
 
-        //[HttpGet(Name = "GetWeatherForecast")]
-        //public IEnumerable<WeatherForecast> Get()
-        //{
-        //    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        //    {
-        //        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-        //        TemperatureC = Random.Shared.Next(-20, 55),
-        //        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        //    })
-        //    .ToArray();
-        //}
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
@@ -41,7 +31,6 @@ namespace IdentityService.Controllers
             var result = await _authService.LoginAsync(request);
             return Ok(result);
         }
-
 
     }
 }
