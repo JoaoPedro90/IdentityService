@@ -11,6 +11,7 @@
     <Content Remove="Service\**" />
     <EmbeddedResource Remove="Service\**" />
     <None Remove="Service\**" />
+    <None Remove="Dockerfile" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
