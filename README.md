@@ -212,10 +212,6 @@ Cada serviço expõe:
 
 ---
 
-## Subir a aplicação
-
-```bash
-docker compose up -d --build
 
 ## 🔗 Microsserviços Relacionados
 
@@ -229,4 +225,11 @@ docker compose up -d --build
 
 - 📡 **SensorService**  
   Serviço responsável pelo gerenciamento de sensores.  
-  👉 https://github.com/JoaoPedro90/SensorService.git  
+  👉 https://github.com/JoaoPedro90/SensorService.git 
+
+## Subir a aplicação
+
+```bash
+docker compose up -d --build
+
+ 
