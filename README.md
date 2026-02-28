@@ -225,7 +225,10 @@ Cada serviço expõe:
 
 - 📡 **SensorService**  
   Serviço responsável pelo gerenciamento de sensores.  
-  👉 https://github.com/JoaoPedro90/SensorService.git 
+  👉 https://github.com/JoaoPedro90/SensorService.git
+
+  **Link do video no Youtube**
+    👉 https://youtu.be/JGETvhPXkI0?si=iqJbrrS4KSelwt0U
 
 ## Subir a aplicação
 
