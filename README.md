@@ -216,3 +216,17 @@ Cada serviço expõe:
 
 ```bash
 docker compose up -d --build
+
+## 🔗 Microsserviços Relacionados
+
+- 🔐 **IdentityService**  
+  Serviço responsável por autenticação e autorização.  
+  👉 https://github.com/JoaoPedro90/IdentityService.git  
+
+- 🏠 **PropertyService**  
+  Serviço responsável pelo gerenciamento de propriedades.  
+  👉 https://github.com/JoaoPedro90/PropertyService.git  
+
+- 📡 **SensorService**  
+  Serviço responsável pelo gerenciamento de sensores.  
+  👉 https://github.com/JoaoPedro90/SensorService.git  
