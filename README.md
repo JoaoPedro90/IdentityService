@@ -1,86 +1,218 @@
-# MVP – Plataforma Agro (IdentityService, PropertyService, SensorService, AlertService)
+# 🌱 Plataforma Agro - MVP (Microserviços)
 
-Este repositório contém um MVP de uma plataforma baseada em microserviços para gestão de propriedades/talhões, ingestão de sensores simulados e geração de alertas.
+Este projeto implementa um **MVP (Minimum Viable Product)** de uma plataforma para monitoramento agrícola, utilizando arquitetura de **microserviços orientada a eventos**.
 
-## Sumário
-- [Visão do MVP](#visão-do-mvp)
-- [Serviços](#serviços)
-- [Arquitetura da Solução](#arquitetura-da-solução)
-- [Mensageria (RabbitMQ)](#mensageria-rabbitmq)
-- [Decisões Arquiteturais e Justificativas](#decisões-arquiteturais-e-justificativas)
-- [Requisitos Não Funcionais](#requisitos-não-funcionais)
-- [Como Rodar Localmente](#como-rodar-localmente)
-- [Fluxos do MVP](#fluxos-do-mvp)
-- [Estrutura Recomendada de Pastas](#estrutura-recomendada-de-pastas)
-- [Evoluções Futuras](#evoluções-futuras)
+A solução permite:
+- Autenticação de produtores
+- Cadastro de propriedades e talhões
+- Ingestão de dados de sensores
+- Geração de alertas automáticos
 
 ---
 
-## Visão do MVP
+# 🧱 Arquitetura da Solução
 
-### Objetivo
-Entregar o fluxo mínimo que comprova valor:
+A solução é composta por quatro microserviços principais:
 
-1. Produtor realiza **login** no **IdentityService** e recebe **JWT**.
-2. Produtor cadastra **Propriedade** e **Talhões** no **PropertyService**.
-3. Ao criar um talhão, o PropertyService **publica um evento** `talhao.created` no RabbitMQ.
-4. O **SensorService** **consome** `talhao.created` e registra o talhão como “conhecido”.
-5. O SensorService expõe API para **ingestão de dados de sensores simulados** (umidade, temperatura, precipitação) para um `talhaoId`.
-6. O SensorService publica `sensor.reading.recorded` e o **AlertService** consome para **gerar alertas**.
+- **IdentityService** → Autenticação e geração de JWT  
+- **PropertyService** → Gestão de propriedades e talhões  
+- **SensorService** → Recebimento e processamento de dados de sensores  
+- **AlertService** → Geração de alertas  
 
----
+## 📊 Diagrama da Arquitetura
 
-## Serviços
-
-### 1) IdentityService
-- Cadastro/login do produtor (MVP pode começar com login).
-- Emissão de **JWT** (claims: `userId`, `email`, etc).
-- Banco próprio (**IdentityDb**).
-
-### 2) PropertyService
-- CRUD de Propriedade e Talhão.
-- Publicação de evento de domínio `talhao.created` no RabbitMQ.
-- Banco próprio (**PropertyDb**).
-
-### 3) SensorService
-- Mantém um catálogo local mínimo de talhões conhecidos (apenas o necessário para validar ingestão).
-- Endpoint para ingestão de leituras simuladas.
-- Publica `sensor.reading.recorded`.
-- Banco próprio (**SensorDb**).
-
-### 4) AlertService
-- Consome `sensor.reading.recorded`.
-- Aplica regras simples (threshold) e gera alertas.
-- API para consulta de alertas.
-- Banco próprio (**AlertDb**).
+![Arquitetura](./docs/arquitetura.png)
 
 ---
 
-## Arquitetura da Solução
+## 🔄 Comunicação entre serviços
 
-### Diagrama (Arquitetura MVP)
+A comunicação é feita de duas formas:
 
-> O diagrama abaixo usa *event-driven* para desacoplar criação de talhões e ingestão/alertas.
+### 🔹 Síncrona (HTTP REST)
+Utilizada para operações que precisam de resposta imediata:
+- Login
+- Cadastro
+- Consulta de dados
 
-```mermaid
-flowchart LR
-  U[Cliente / Front-end / Postman] -->|Login| ID[IdentityService]
-  U -->|CRUD Propriedade/Talhão (JWT)| PS[PropertyService]
-  U -->|Enviar leituras (JWT)| SS[SensorService]
-  U -->|Consultar alertas (JWT)| AS[AlertService]
+### 🔹 Assíncrona (RabbitMQ)
+Utilizada para eventos de domínio:
 
-  subgraph MQ[RabbitMQ]
-    EX1[(Exchange: property.events)]
-    EX2[(Exchange: sensor.events)]
-  end
+- `talhao.created` → Property → Sensor  
+- `sensor.reading.created` → Sensor → Alert  
 
-  PS -->|publish talhao.created| EX1
-  SS -->|consume talhao.created| EX1
+---
 
-  SS -->|publish sensor.reading.recorded| EX2
-  AS -->|consume sensor.reading.recorded| EX2
+## 🧩 Tecnologias utilizadas
 
-  ID --> DB1[(DB Identity)]
-  PS --> DB2[(DB Property)]
-  SS --> DB3[(DB Sensor)]
-  AS --> DB4[(DB Alert)]
+- .NET 8
+- ASP.NET Core
+- RabbitMQ
+- SQL Server
+- Docker / Docker Compose
+- GitHub Actions (CI/CD)
+- Prometheus + Grafana (Observabilidade)
+
+---
+
+# ⚙️ Justificativa técnica das decisões arquiteturais
+
+## 1. Microserviços
+
+A aplicação foi dividida em múltiplos serviços independentes.
+
+### Benefícios:
+- Separação de responsabilidades
+- Escalabilidade independente
+- Deploy isolado
+- Manutenção facilitada
+
+---
+
+## 2. Comunicação via eventos (RabbitMQ)
+
+Eventos são utilizados para comunicação entre serviços.
+
+### Benefícios:
+- Desacoplamento
+- Resiliência
+- Escalabilidade
+- Extensibilidade
+
+---
+
+## 3. Banco de dados por serviço
+
+Cada serviço possui seu próprio banco:
+
+- Identity → AuthDB  
+- Property → PropriedadeDB  
+- Sensor → SensorDB  
+- Alert → AlertsDB  
+
+### Benefícios:
+- Independência entre serviços
+- Evita conflitos de schema
+- Permite otimizações específicas
+
+---
+
+## 4. JWT para autenticação
+
+O IdentityService emite tokens JWT.
+
+### Benefícios:
+- Stateless
+- Baixa latência
+- Segurança
+- Facilidade de integração
+
+---
+
+## 5. Docker
+
+Todos os serviços são executados em containers.
+
+### Benefícios:
+- Ambiente padronizado
+- Fácil deploy
+- Isolamento de dependências
+
+---
+
+## 6. CI/CD automatizado
+
+Cada serviço possui pipeline via GitHub Actions.
+
+### Benefícios:
+- Build automatizado
+- Execução de testes
+- Redução de erros manuais
+- Integração contínua
+
+---
+
+# 🛡️ Como os requisitos não funcionais são atendidos
+
+## 🔐 Segurança
+
+- Autenticação via JWT
+- Validação de token em todos os serviços
+- Variáveis de ambiente para segredos
+
+---
+
+## 📈 Escalabilidade
+
+- Arquitetura de microserviços
+- Comunicação assíncrona com RabbitMQ
+- Possibilidade de múltiplas instâncias
+
+---
+
+## 🔄 Disponibilidade e Resiliência
+
+- RabbitMQ armazena mensagens
+- Serviços independentes
+- Health checks
+
+---
+
+## ⚡ Performance
+
+- Processamento assíncrono
+- Redução de chamadas síncronas
+- Banco isolado por serviço
+
+---
+
+## 👀 Observabilidade
+
+Implementada com:
+
+- Prometheus (coleta de métricas)
+- Grafana (dashboards)
+
+Cada serviço expõe:
+
+- `/health`
+- `/metrics`
+
+---
+
+## 🧩 Manutenibilidade
+
+- Clean Architecture
+- Separação em camadas
+- Baixo acoplamento
+
+---
+
+## 🔁 Consistência
+
+- Consistência eventual
+- Uso de eventos para sincronização
+
+---
+
+## 🔒 Confiabilidade
+
+- Retry em mensagens
+- Idempotência
+- Uso de filas
+
+---
+
+# 🚀 Como rodar o projeto
+
+## Pré-requisitos
+
+- Docker
+- Docker Compose
+
+---
+
+## Subir a aplicação
+
+```bash
+docker compose up -d --build
